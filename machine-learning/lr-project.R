@@ -33,11 +33,9 @@ print(corData)
 pl3 <- ggplot(bike, aes(factor(season),count)) +
   geom_boxplot(aes(color=factor(season)))
               
-
-
-
+# extract hour from timestamp
 bike$hour <- hour(bike$datetime)
-# format(bike$hour, "%H")
+bike$hour <- sapply(bike$hour, as.numeric)
 
 bikeWorkDay <- subset(bike, workingday == 1)
 bikeNonWorkDay <- subset(bike, workingday == 0)
@@ -62,6 +60,17 @@ tempModel <- lm(count ~ temp, bike)
 
 print(summary(tempModel))
 
+# predict count based on temp = 25
 
+y = 6.0462 + (9.17 * 25)  # (Base intercept + temp std. * temp)
+print(y)
 
+tempTest <- data.frame(temp=c(25))
+result <- predict(tempModel, tempTest)
+print(result)
+
+# model based on more variables (p)
+
+model <- lm(count ~ . -casual -registered -datetime -date -atemp, bike)
+print(summary(model))
 
