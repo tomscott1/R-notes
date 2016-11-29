@@ -3,6 +3,7 @@
 library(Amelia)
 library(ggplot2)
 library(dplyr)
+library(caTools)
 
 trainingSet <- read.csv('titanic_train.csv')
 print(head(trainingSet))
@@ -79,7 +80,24 @@ trainingSet$SibSp <- factor(trainingSet$SibSp)
 logModel <- glm(Survived ~ ., family=binomial(link='logit'), data=trainingSet)
 print(summary(logModel))
 
+# set seed
+set.seed(101)
 
+split <- sample.split(trainingSet$Survived, SplitRatio = 0.7)
+finalTrain <- subset(trainingSet, split == TRUE)
+finalTest <- subset(trainingSet, split == FALSE)
+finalLogModel <- glm(Survived ~ ., family = binomial(link='logit'), data = finalTrain)
+print(summary(finalLogModel))
+
+# predict
+
+fittedProbabilities <- predict(finalLogModel, finalTest, type = 'response')
+fittedResults <- ifelse(fittedProbabilities>0.5,1,0)
+misClassError <- mean(fittedResults != finalTest$Survived)
+print(1 - misClassError)
+
+# confusion matrix
+print(table(finalTest$Survived, fittedProbabilities>0.5))
 
 
 
