@@ -100,4 +100,3 @@ R2 <- 1 - SSE/SST
 print('R2')
 print(R2)
 
-

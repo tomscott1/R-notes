@@ -1,5 +1,8 @@
 # logistic regression project
 library(dplyr)
+library(Amelia)
+library(gdata)
+library(ggplot2)
 
 df <- read.csv('adult_sal.csv')
 print(head(df))
@@ -63,3 +66,45 @@ adult$country <- sapply(adult$country, fix_emp_type,
                         c('Canada','United-States'), 'North America')
 
 print(table(adult$country))
+
+adult$type_employer <- factor(adult$type_employer)
+adult$marital <- factor(adult$marital)
+adult$country <- factor(adult$country)
+
+# missing data
+adult <- unknownToNA(adult, '?', warning=FALSE)
+adult <- unknownToNA(adult, ' ?', warning=FALSE)
+adult <- na.omit(adult)
+
+# missmap(adult, legend = FALSE, col = c('yellow', 'black'), y.labels =c(''), y.at = c(1))
+
+print(str(adult))
+adult$income <- factor(adult$income , 
+                   levels=levels(adult$income)[order(levels(adult$income), decreasing = TRUE)])
+
+pl1 <- ggplot(adult, aes(age)) + geom_histogram(binwidth = 1, aes(fill=factor(income)))
+pl1 <- pl1 + guides(fill = guide_legend(reverse = TRUE))
+print(pl1)
+
+pl2 <- ggplot(adult, aes(hr_per_week)) + geom_histogram()
+print(pl2)
+
+colnames(adult)[14] <- 'region'
+print(colnames(adult))
+
+
+# Create a barplot of region with the fill color defined by income class.
+# Optional: Figure out how rotate the x axis text for readability
+
+pl3 <- ggplot(adult, aes(region)) + geom_bar(aes(fill=factor(income)))
+pl3 <- pl3 + theme(axis.text.x=element_text(angle=60, hjust=1))
+print(pl3)
+
+
+
+
+
+
+
+
+
