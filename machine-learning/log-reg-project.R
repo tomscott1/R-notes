@@ -3,6 +3,7 @@ library(dplyr)
 library(Amelia)
 library(gdata)
 library(ggplot2)
+library(caTools)
 
 df <- read.csv('adult_sal.csv')
 print(head(df))
@@ -100,7 +101,35 @@ pl3 <- ggplot(adult, aes(region)) + geom_bar(aes(fill=factor(income)))
 pl3 <- pl3 + theme(axis.text.x=element_text(angle=60, hjust=1))
 print(pl3)
 
+# split data for training
+set.seed(101)
 
+# split up data to split into training and test data
+sample <- sample.split(adult$income, SplitRatio = 0.7)
+
+# 70% of data split for training
+train <- subset(df, sample == TRUE)
+
+# 30% of data split for testing
+test <- subset(df, sample == FALSE)
+
+model <- glm(income ~ ., family = binomial(link='logit'), data = train)
+print(summary(model))
+
+# use step to update model
+
+stepModel <- step(model)
+print(summary(stepModel))
+
+# predict
+
+fittedProbabilities <- predict(stepModel, test, type = 'response')
+fittedResults <- ifelse(fittedProbabilities>0.5,1,0)
+misClassError <- mean(fittedResults != test$income)
+print(1 - misClassError)
+
+# confusion matrix
+print(table(test$income, fittedProbabilities>0.5))
 
 
 
